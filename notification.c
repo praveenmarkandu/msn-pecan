@@ -1365,6 +1365,39 @@ initial_mdata_msg (MsnCmdProc *cmdproc,
 
                 g_free (iu);
             }
+
+            do
+            {
+                start = g_strstr_len (start, len - (start - mdata), "<M>");
+
+                if (start)
+                {
+                    start += strlen ("<M>");
+                    end = g_strstr_len (start, len - (start - mdata), "</M>");
+
+                    if (end > start)
+                    {
+                        {
+                            gchar *field;
+                            gchar *tmp;
+                            tmp = pecan_get_xml_field ("N", start, end);
+                            field = purple_mime_decode_field (tmp);
+                            g_print ("field={%s}\n", field);
+                            g_free (field);
+                            g_free (tmp);
+                        }
+
+                        {
+                            gchar *contact_username;
+                            contact_username = pecan_get_xml_field ("E", start, end);
+                            g_print ("contact={%s}\n", contact_username);
+                            g_free (contact_username);
+                        }
+
+                        start = end + strlen ("</M>");
+                    }
+                }
+            } while (start);
         }
 
         if (purple_account_get_check_mail (session->account) &&
