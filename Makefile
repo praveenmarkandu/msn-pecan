@@ -50,6 +50,7 @@ objects = \
 	  pecan_printf.o \
 	  pecan_util.o \
 	  pecan_status.o \
+	  pecan_oim.o \
 	  cmd/cmdproc.o \
 	  cmd/command.o \
 	  cmd/history.o \
