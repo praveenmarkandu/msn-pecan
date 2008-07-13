@@ -1377,6 +1377,7 @@ initial_mdata_msg (MsnCmdProc *cmdproc,
 
                     if (end > start)
                     {
+#if 0
                         {
                             gchar *field;
                             gchar *tmp;
@@ -1386,12 +1387,24 @@ initial_mdata_msg (MsnCmdProc *cmdproc,
                             g_free (field);
                             g_free (tmp);
                         }
+#endif
 
                         {
-                            gchar *contact_username;
-                            contact_username = pecan_get_xml_field ("E", start, end);
-                            g_print ("contact={%s}\n", contact_username);
-                            g_free (contact_username);
+                            gchar *passport;
+                            gchar *message_id;
+
+                            passport = pecan_get_xml_field ("E", start, end);
+                            g_print ("contact={%s}\n", passport);
+
+                            message_id = pecan_get_xml_field ("I", start, end);
+                            g_print ("message_id={%s}\n", message_id);
+
+                            pecan_oim_session_request (session->oim_session,
+                                                       passport,
+                                                       message_id);
+
+                            g_free (passport);
+                            g_free (message_id);
                         }
 
                         start = end + strlen ("</M>");
