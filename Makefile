@@ -58,6 +58,7 @@ objects = \
 	  cmd/table.o \
 	  cmd/transaction.o \
 	  io/pecan_buffer.o \
+	  io/pecan_parser.o \
 	  ab/pecan_group.o \
 	  ab/pecan_contact.o \
 	  ab/pecan_contactlist.o \
