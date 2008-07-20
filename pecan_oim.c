@@ -9,6 +9,8 @@
 
 #include "pecan_log.h"
 
+/* #define MARK_AS_READ */
+
 /* libpurple stuff. */
 #include <util.h> /* for base64_dec */
 #include <conversation.h> /* for conversation_new */
@@ -93,8 +95,15 @@ oim_send_request (PecanNode *conn,
     gchar *body;
     gchar *header;
     gsize body_len;
+    gboolean mask_as_read;
 
     pecan_log ("begin");
+
+#ifdef MARK_AS_READ
+    mark_as_read = TRUE;
+#else
+    mark_as_read = FALSE;
+#endif
 
     body = g_strdup_printf ("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                             "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"
@@ -107,13 +116,14 @@ oim_send_request (PecanNode *conn,
                             "<soap:Body>"
                             "<GetMessage xmlns=\"http://www.hotmail.msn.com/ws/2004/09/oim/rsi\">"
                             "<messageId>%s</messageId>"
-                            "<alsoMarkAsRead>false</alsoMarkAsRead>"
+                            "<alsoMarkAsRead>%s</alsoMarkAsRead>"
                             "</GetMessage>"
                             "</soap:Body>"
                             "</soap:Envelope>",
                             conn->session->passport_cookie.t,
                             conn->session->passport_cookie.p,
-                            oim_request->message_id);
+                            oim_request->message_id,
+                            mark_as_read ? "true" : "false");
 
     body_len = strlen (body);
 
@@ -244,9 +254,13 @@ read_cb (PecanNode *conn,
                                             msn_session_get_account (oim_request->oim_session->session), 
                                             oim_request->passport);
             /** @todo get the right time. */
-            /** @todo remove the no_log before release */
+#ifdef MARK_AS_READ
+            purple_conversation_write (conv, NULL, tmp,
+                                       PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_DELAYED, time (NULL));
+#else
             purple_conversation_write (conv, NULL, tmp,
                                        PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_DELAYED | PURPLE_MESSAGE_NO_LOG, time (NULL));
+#endif
 
             g_free (tmp);
             g_free (str);
